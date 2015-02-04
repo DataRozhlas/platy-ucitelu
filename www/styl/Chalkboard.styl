@@ -48,3 +48,21 @@
     font-size 30px
     font-weight normal
     color white
+  &.money
+    .tick
+      text.count
+        opacity 0
+      &.active-count
+        text.count
+          opacity 1
+      &.active-country
+        text.country
+          opacity 1
+    g.mouse-is-active
+      .tick
+        text
+          opacity 0 !important
+        &.active-mouse
+          text.count
+          text.country
+            opacity 1 !important

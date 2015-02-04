@@ -1,14 +1,18 @@
 class ig.Chalkboard
-  (@parentElement, @countries, @budgets) ->
+  (@parentElement, @countries, @budgets, @display) ->
+    @isMoney = @display?money
     @element = @parentElement.append \div
       ..attr \class \content
     @svg = @element.append \svg
       ..attr \width 1000
       ..attr \height 600
     @initFilter!
-    @drawZakPerUcitelLine!
-    @initComputeRatioText!
-    @computeForRatio 14
+    if @isMoney
+      @drawMoneyLine!
+    else
+      @drawZakPerUcitelLine!
+      @initComputeRatioText!
+      @computeForRatio 14
 
   computeForRatio: (ratio) ->
     avgPay          = 23705
@@ -120,6 +124,91 @@ class ig.Chalkboard
       .attr \y 34 * 4 + 20
     g.selectAll \text .attr \filter 'url(#chalk-text)'
 
+  drawMoneyLine: ->
+    grouped_assoc = {}
+    for country in @countries
+      grouped_assoc[country['plat-procent']] ?= []
+      grouped_assoc[country['plat-procent']].push country
+    grouped = for ratio, countries of grouped_assoc
+      ratio = countries.0.['plat-procent']
+      {'plat-procent': ratio, countries}
+    for i in [0.8 1.45 1.65 1.70 1.75 1.80 1.85 1.90 2.05 2.10 2.15]
+      grouped.push {'plat-procent': i, isBogus: yes}
+
+    extent = d3.extent grouped.map (.['plat-procent'])
+    margin = 60
+    width = 880
+    xScale = d3.scale.linear!
+      ..domain extent
+      ..range [0, width]
+    group = @svg.append \g
+      ..attr \class \zak-per-ucitel
+      ..attr \transform "translate(#margin,50)"
+    @headingText = group.append \text
+      ..attr \filter 'url(#chalk-text)'
+      ..text "Současný průměrný učitelský plat: 23 705 Kč (94 % národního průměru)"
+      ..attr \font-size 30
+      ..attr \fill \white
+      ..attr \x -7
+      ..attr \y 0
+    sgroup = group.append \g
+      ..attr \transform "translate(0, 20)"
+      ..append \rect
+        ..attr \filter 'url(#chalk)'
+        ..attr \x 0
+        ..attr \y 40
+        ..attr \width width
+        ..attr \height 2
+      ..attr \class "line plat-procent"
+    ticks = sgroup.selectAll \g.tick .data grouped .enter!append \g
+        ..attr \class "tick"
+        ..classed \active-count -> it['plat-procent'] in [0.66 0.94 2.24]
+        ..classed \active-country -> it['plat-procent'] in [0.66 0.94 2.24]
+        ..attr \transform -> "translate(#{xScale it['plat-procent']}, 0)"
+        ..append \text
+          ..attr \class \count
+          ..attr \y 30
+          ..attr \font-size 17
+          ..attr \letter-spacing 2
+          ..attr \filter 'url(#chalk-text)'
+          ..attr \text-anchor \middle
+          ..text -> "#{Math.round it['plat-procent'] * 100} %"
+        ..filter (-> not it.isBogus)
+          ..append \rect
+            ..attr \filter 'url(#chalk)'
+            ..attr \x 0
+            ..attr \y -> 34 + Math.round Math.random! * 2
+            ..attr \width 2
+            ..attr \height -> 11 + Math.round Math.random! * 2
+            ..on \mouseover -> console.log it
+          ..append \text
+            ..attr \class \country
+            ..attr \font-size 20
+            ..attr \y 75
+            ..attr \x -7
+            ..text ->
+              unless it.isBogus
+                it.countries.map (.zeme) .join ", "
+              else
+                void
+            ..attr \transform " rotate(20,0,50)"
+            ..attr \filter 'url(#chalk-text)'
+    voronoi = d3.geom.voronoi!
+      ..x -> xScale it['plat-procent']
+      ..y 0
+      ..clipExtent [[-30,0],[width + 30, 200]]
+    points = voronoi grouped .filter -> it
+    group.append \g
+      ..attr \class \voronoi
+      ..selectAll \path .data points .enter!append \path
+        ..attr \d polygon
+        ..attr \fill \transparent
+        ..on \mouseover ({point}) ->
+          ticks.classed \active-mouse -> it is point
+          sgroup.classed \mouse-is-active yes
+        ..on \mouseout ->
+          sgroup.classed \mouse-is-active no
+
   drawZakPerUcitelLine: ->
     grouped_assoc = {}
     for country in @countries
@@ -138,6 +227,7 @@ class ig.Chalkboard
     xScale = d3.scale.linear!
       ..domain extent
       ..range [width, 0]
+
 
     group = @svg.append \g
       ..attr \class \zak-per-ucitel
@@ -264,3 +354,6 @@ class ig.Chalkboard
         ..attr \scale "2"
         ..attr \in "SourceGraphic"
         ..attr \in2 "result1"
+
+polygon = ->
+  "M#{it.join "L"}Z"
