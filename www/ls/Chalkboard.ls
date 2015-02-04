@@ -5,13 +5,10 @@ class ig.Chalkboard
     @svg = @element.append \svg
       ..attr \width 1000
       ..attr \height 600
-
     @initFilter!
-
     @drawZakPerUcitelLine!
 
   drawZakPerUcitelLine: ->
-
     grouped_assoc = {}
     for country in @countries
       grouped_assoc[country['zak-per-ucitel']] ?= []
@@ -75,7 +72,6 @@ class ig.Chalkboard
           ..text -> it['zak-per-ucitel']
 
 
-
   initFilter: ->
     @svg.append \filter
       ..attr \id \chalk
@@ -123,5 +119,3 @@ class ig.Chalkboard
         ..attr \scale "2"
         ..attr \in "SourceGraphic"
         ..attr \in2 "result1"
-
-
