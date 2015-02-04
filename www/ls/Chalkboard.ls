@@ -18,9 +18,9 @@ class ig.Chalkboard
       {'zak-per-ucitel': ratio, countries}
     margin = 60
     width = 1000 - 2 * margin
-    width = 700
-    cz = @countries[5]
-      ..countries = [@countries[5]]
+    width = 650
+    cz = @countries[0]
+      ..countries = [@countries[0]]
     grouped.push cz
     xScale = d3.scale.linear!
       ..domain d3.extent @countries.map (.['zak-per-ucitel'])
@@ -32,12 +32,13 @@ class ig.Chalkboard
     group
       ..append \text
         ..attr \filter 'url(#chalk-text)'
-        ..text "Počet žáků na jednoho učitele: 10,5"
+        ..text "Současný počet žáků na jednoho učitele: 14"
         ..attr \font-size 30
         ..attr \fill \white
-        ..attr \x 0
+        ..attr \x -7
         ..attr \y 0
     group.append \g
+      ..attr \transform "translate(0, 20)"
       ..append \rect
         ..attr \filter 'url(#chalk)'
         ..attr \x 0
@@ -60,7 +61,7 @@ class ig.Chalkboard
           ..attr \font-size 20
           ..attr \y 70
           ..text -> it.countries.map (.zeme) .join ", "
-          ..attr \transform " rotate(30,0,60)"
+          ..attr \transform " rotate(40,0,60)"
           ..attr \filter 'url(#chalk-text)'
         ..append \text
           ..attr \class \count
