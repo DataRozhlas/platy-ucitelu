@@ -8,7 +8,6 @@ class ig.Chalkboard
     @initFilter!
     @drawZakPerUcitelLine!
     @initComputeRatioText!
-    @computeForRatio 15
 
   computeForRatio: (ratio) ->
     avgPay          = 23705
@@ -134,8 +133,9 @@ class ig.Chalkboard
     cz = @countries[0]
       ..countries = [@countries[0]]
     grouped.push cz
+    extent = d3.extent @countries.map (.['zak-per-ucitel'])
     xScale = d3.scale.linear!
-      ..domain d3.extent @countries.map (.['zak-per-ucitel'])
+      ..domain extent
       ..range [width, 0]
 
     group = @svg.append \g
@@ -182,6 +182,16 @@ class ig.Chalkboard
           ..attr \filter 'url(#chalk-text)'
           ..attr \text-anchor \middle
           ..text -> it['zak-per-ucitel']
+    rectWidth = (xScale 9) - (xScale 10)
+    group.append \g
+      ..attr \class \hoverables
+      ..attr \transform "translate(#{rectWidth * (-0.5)}, 20)"
+      ..selectAll \rect .data [extent.0 to extent.1] .enter!append \rect
+        ..attr \x xScale
+        ..attr \y 0
+        ..attr \width rectWidth
+        ..attr \height 400
+        ..on \mouseover ~> @computeForRatio it
 
 
   initFilter: ->
