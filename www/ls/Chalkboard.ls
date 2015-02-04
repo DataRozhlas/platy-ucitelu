@@ -206,6 +206,14 @@ class ig.Chalkboard
           y = if grouped_assoc[it] then 18 else 41
           "translate(#x, #y)"
         ..attr \points "0,0 20,0 10,10"
+    @svg.append \text
+      ..text "Myší nastavíte poměr pro výpočet ceny učitelů"
+      ..attr \filter 'url(#chalk-text)'
+      ..attr \font-size 20
+      ..attr \fill \white
+      ..attr \x 970
+      ..attr \y 50
+      ..attr \text-anchor \end
 
 
 
