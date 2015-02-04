@@ -9,6 +9,8 @@ class ig.Chalkboard
     @initFilter!
     if @isMoney
       @drawMoneyLine!
+      @initMoneyText!
+      @computeForPercentage 1
     else
       @drawZakPerUcitelLine!
       @initComputeRatioText!
@@ -25,9 +27,9 @@ class ig.Chalkboard
     @explanatoryTextG.classed \disabled teachersToHire == 0
     @teachersToHire.text ig.utils.formatNumber Math.abs teachersToHire
     @teachersToHireText.text if teachersToHire > 0
-      ". . . . . učitelů by bylo potřeba najmout"
+      ". . . . učitelů by bylo potřeba najmout"
     else
-      ". . . . . učitelů by bylo možné propustit"
+      ". . . . učitelů by bylo možné propustit"
     totalPrice = Math.abs teachersToHire * (avgPay + avgPayTax) * 12
     @totalCost.text ig.utils.formatNumber totalPrice
 
@@ -42,6 +44,33 @@ class ig.Chalkboard
     else
       "Vypočtený počet žáků na jednoho učitele: #{ratio}"
 
+  computeForPercentage: (percentage) ->
+    avgNational = 25218
+    currentPay = 23705
+    newPay = avgNational * percentage
+    pricePerTeacher = Math.round newPay - currentPay
+    numTeachers = 119426
+    price = numTeachers * pricePerTeacher * 12
+
+    @explanatoryTextG.classed \disabled price == 0
+    if price == 0
+      @headingText.html "Současný průměrný učitelský plat: 23 705 Kč (94 % národního průměru)"
+    else
+      @headingText.html "Nový učitelský plat: #{ig.utils.formatNumber newPay} Kč (#{Math.round percentage * 100} % národního průměru)"
+    @amountToRaise.text ig.utils.formatNumber Math.abs pricePerTeacher
+    @amountToRaiseText.text if pricePerTeacher > 0
+      ". . . . by každý učitel dostal přidáno"
+    else
+      ". . . . by každý učitel ztratil"
+    @totalCostText.text if pricePerTeacher > 0
+      "jsou celkové roční náklady"
+    else
+      "je celková roční úspora"
+    budget = @getClosestBudget Math.abs price
+    @totalCost.html ig.utils.formatNumber Math.abs price
+    @budgetText.text "To je přibližně rozpočet #{budget.urad}"
+
+
   getClosestBudget: (amount) ->
     currentDiff = Infinity
     for {rozpocet}:budget, index in @budgets
@@ -52,18 +81,19 @@ class ig.Chalkboard
         currentDiff = d
     return budget
 
-  initComputeRatioText: ->
+
+  initMoneyText: ->
     @explanatoryTextG = g = @svg.append \g
       .attr \class "explanatory-text disabled"
-      .attr \transform "translate(60, 400)"
-    @teachersToHire = g.append \text
+      .attr \transform "translate(60, 366)"
+    @amountToRaise = g.append \text
       .text "9 187"
       .attr \text-anchor \end
       .attr \x 120
       .attr \y 0
-    @teachersToHireText = g.append \text
-      .text ". . . . . učitelů by bylo potřeba najmout"
-      .attr \x 112
+    @amountToRaiseText = g.append \text
+      .text ". . . . by každý učitel dostal přidáno"
+      .attr \x 126
       .attr \y 0
     g.append \text
       .text "×"
@@ -71,13 +101,13 @@ class ig.Chalkboard
       .attr \x 15
       .attr \y 34
     g.append \text
-      .text "31 765"
+      .text "1,37"
       .attr \text-anchor \end
       .attr \x 120
       .attr \y 34
     g.append \text
-      .text ". . . . . je jejich průměrná superhrubá mzda"
-      .attr \x 112
+      .text ". . . . sociální a zdravotní pojištění"
+      .attr \x 126
       .attr \y 34
     g.append \text
       .text "×"
@@ -90,8 +120,95 @@ class ig.Chalkboard
       .attr \x 120
       .attr \y 34 * 2
     g.append \text
-      .text ". . . . . měsíců"
-      .attr \x 112
+      .text ". . . . měsíců"
+      .attr \x 126
+      .attr \y 34 * 2
+    g.append \text
+      .text "×"
+      .attr \text-anchor \end
+      .attr \x 15
+      .attr \y 34 * 3
+    g.append \text
+      .text "119 426"
+      .attr \text-anchor \end
+      .attr \x 120
+      .attr \y 34 * 3
+    g.append \text
+      .text ". . . . učitelů"
+      .attr \x 126
+      .attr \y 34 * 3
+
+    g.append \rect
+      .attr \filter 'url(#chalk)'
+      .attr \x -20
+      .attr \y 34 * 3 + 10
+      .attr \width 144
+      .attr \height 2
+    @totalCost = g.append \text
+      .attr \class \sum
+      .text "3 501 900 660"
+      .attr \text-anchor \end
+      .attr \x 120
+      .attr \y 34 * 4 + 10
+    g.append \text
+      .attr \class \sum
+      .text "Kč"
+      .attr \x 132
+      .attr \y 34 * 4 + 10
+    g.append \text
+      .text ".."
+      .attr \x 162
+      .attr \letter-spacing 8
+      .attr \y 34 * 4 + 10
+    @totalCostText = g.append \text
+      .text "jsou celkové roční náklady"
+      .attr \x 189
+      .attr \y 34 * 4 + 10
+    @budgetText = g.append \text
+      .attr \x 180
+      .attr \y 34 * 5 + 20
+    g.selectAll \text .attr \filter 'url(#chalk-text)'
+
+  initComputeRatioText: ->
+    @explanatoryTextG = g = @svg.append \g
+      .attr \class "explanatory-text disabled"
+      .attr \transform "translate(60, 400)"
+    @teachersToHire = g.append \text
+      .text "9 187"
+      .attr \text-anchor \end
+      .attr \x 120
+      .attr \y 0
+    @teachersToHireText = g.append \text
+      .text ". . . . učitelů by bylo potřeba najmout"
+      .attr \x 126
+      .attr \y 0
+    g.append \text
+      .text "×"
+      .attr \text-anchor \end
+      .attr \x 15
+      .attr \y 34
+    g.append \text
+      .text "31 765"
+      .attr \text-anchor \end
+      .attr \x 120
+      .attr \y 34
+    g.append \text
+      .text ". . . . je jejich průměrná superhrubá mzda"
+      .attr \x 126
+      .attr \y 34
+    g.append \text
+      .text "×"
+      .attr \text-anchor \end
+      .attr \x 15
+      .attr \y 34 * 2
+    g.append \text
+      .text "12"
+      .attr \text-anchor \end
+      .attr \x 120
+      .attr \y 34 * 2
+    g.append \text
+      .text ". . . . měsíců"
+      .attr \x 126
       .attr \y 34 * 2
     g.append \rect
       .attr \filter 'url(#chalk)'
@@ -180,7 +297,6 @@ class ig.Chalkboard
             ..attr \y -> 34 + Math.round Math.random! * 2
             ..attr \width 2
             ..attr \height -> 11 + Math.round Math.random! * 2
-            ..on \mouseover -> console.log it
           ..append \text
             ..attr \class \country
             ..attr \font-size 20
@@ -203,9 +319,10 @@ class ig.Chalkboard
       ..selectAll \path .data points .enter!append \path
         ..attr \d polygon
         ..attr \fill \transparent
-        ..on \mouseover ({point}) ->
+        ..on \mouseover ({point}) ~>
           ticks.classed \active-mouse -> it is point
           sgroup.classed \mouse-is-active yes
+          @computeForPercentage point['plat-procent']
         ..on \mouseout ->
           sgroup.classed \mouse-is-active no
 
