@@ -7,6 +7,99 @@ class ig.Chalkboard
       ..attr \height 600
     @initFilter!
     @drawZakPerUcitelLine!
+    @initComputeRatioText!
+    @computeForRatio 15
+
+  computeForRatio: (ratio) ->
+    avgPay          = 23705
+    currentTeachers = 119426
+    students        = currentTeachers * 14
+    newTeachers     = students / ratio
+    teachersToHire  = Math.round newTeachers - currentTeachers
+    taxes           = 0.34
+    avgPayTax       = Math.round avgPay * taxes
+    @explanatoryTextG.classed \disabled teachersToHire == 0
+    console.log "#{teachersToHire} učitelů je potřeba najmout"
+    console.log "x #{avgPay + avgPayTax} jejich superhrubá mzda"
+    console.log "x 12 měsíců"
+    console.log "#{teachersToHire * (avgPay + avgPayTax) * 12} celkem"
+    @teachersToHire.text ig.utils.formatNumber Math.abs teachersToHire
+    @teachersToHireText.text if teachersToHire > 0
+      ". . . . . učitelů by bylo potřeba najmout"
+    else
+      ". . . . . učitelů by bylo možné propustit"
+    @totalCost.text ig.utils.formatNumber Math.abs teachersToHire * (avgPay + avgPayTax) * 12
+    @totalCostText.text if teachersToHire > 0
+      "jsou celkové roční náklady"
+    else
+      "je celková roční úspora"
+
+  initComputeRatioText: ->
+    @explanatoryTextG = g = @svg.append \g
+      .attr \class "explanatory-text disabled"
+      .attr \transform "translate(60, 400)"
+    @teachersToHire = g.append \text
+      .text "9 187"
+      .attr \text-anchor \end
+      .attr \x 120
+      .attr \y 0
+    @teachersToHireText = g.append \text
+      .text ". . . . . učitelů by bylo potřeba najmout"
+      .attr \x 112
+      .attr \y 0
+    g.append \text
+      .text "×"
+      .attr \text-anchor \end
+      .attr \x 15
+      .attr \y 34
+    g.append \text
+      .text "31 765"
+      .attr \text-anchor \end
+      .attr \x 120
+      .attr \y 34
+    g.append \text
+      .text ". . . . . je jejich průměrná superhrubá mzda"
+      .attr \x 112
+      .attr \y 34
+    g.append \text
+      .text "×"
+      .attr \text-anchor \end
+      .attr \x 15
+      .attr \y 34 * 2
+    g.append \text
+      .text "12"
+      .attr \text-anchor \end
+      .attr \x 120
+      .attr \y 34 * 2
+    g.append \text
+      .text ". . . . . měsíců"
+      .attr \x 112
+      .attr \y 34 * 2
+    g.append \rect
+      .attr \filter 'url(#chalk)'
+      .attr \x -20
+      .attr \y 34 * 2 + 10
+      .attr \width 144
+      .attr \height 2
+    @totalCost = g.append \text
+      .text "3 501 900 660"
+      .attr \text-anchor \end
+      .attr \x 120
+      .attr \y 34 * 3 + 10
+    g.append \text
+      .text "Kč"
+      .attr \x 132
+      .attr \y 34 * 3 + 10
+    g.append \text
+      .text ".."
+      .attr \x 162
+      .attr \letter-spacing 8
+      .attr \y 34 * 3 + 10
+    @totalCostText = g.append \text
+      .text "jsou celkové roční náklady"
+      .attr \x 189
+      .attr \y 34 * 3 + 10
+    g.selectAll \text .attr \filter 'url(#chalk-text)'
 
   drawZakPerUcitelLine: ->
     grouped_assoc = {}
