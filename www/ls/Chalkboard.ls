@@ -8,6 +8,7 @@ class ig.Chalkboard
     @initFilter!
     @drawZakPerUcitelLine!
     @initComputeRatioText!
+    @computeForRatio 14
 
   computeForRatio: (ratio) ->
     avgPay          = 23705
@@ -191,7 +192,21 @@ class ig.Chalkboard
         ..attr \y 0
         ..attr \width rectWidth
         ..attr \height 400
-        ..on \mouseover ~> @computeForRatio it
+        ..on \mouseover (ratio) ~>
+          @computeForRatio ratio
+          triangles.classed \disabled -> it isnt ratio
+    triangles = group.append \g
+      .attr \class \triangles
+      .selectAll \polygon .data [extent.0 to extent.1] .enter!append \polygon
+        ..classed \disabled -> it isnt 14
+        ..attr \filter 'url(#chalk)'
+        ..attr \fill \white
+        ..attr \transform ->
+          x = -10 + xScale it
+          y = if grouped_assoc[it] then 18 else 41
+          "translate(#x, #y)"
+        ..attr \points "0,0 20,0 10,10"
+
 
 
   initFilter: ->
