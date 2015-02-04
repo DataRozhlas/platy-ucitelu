@@ -21,12 +21,13 @@ class ig.Chalkboard
       {'zak-per-ucitel': ratio, countries}
     margin = 60
     width = 1000 - 2 * margin
+    width = 700
     cz = @countries[5]
       ..countries = [@countries[5]]
     grouped.push cz
     xScale = d3.scale.linear!
       ..domain d3.extent @countries.map (.['zak-per-ucitel'])
-      ..range [0 width]
+      ..range [width, 0]
 
     group = @svg.append \g
       ..attr \class \zak-per-ucitel
