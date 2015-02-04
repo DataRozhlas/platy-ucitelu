@@ -33,6 +33,10 @@ class ig.Chalkboard
       "je celková roční úspora"
     budget = @getClosestBudget totalPrice
     @budgetText.text "To je přibližně rozpočet #{budget.urad}"
+    @headingText.text if teachersToHire == 0
+      "Současný počet žáků na jednoho učitele: 14"
+    else
+      "Vypočtený počet žáků na jednoho učitele: #{ratio}"
 
   getClosestBudget: (amount) ->
     currentDiff = Infinity
@@ -137,14 +141,13 @@ class ig.Chalkboard
     group = @svg.append \g
       ..attr \class \zak-per-ucitel
       ..attr \transform "translate(#margin,50)"
-    group
-      ..append \text
-        ..attr \filter 'url(#chalk-text)'
-        ..text "Současný počet žáků na jednoho učitele: 14"
-        ..attr \font-size 30
-        ..attr \fill \white
-        ..attr \x -7
-        ..attr \y 0
+    @headingText = group.append \text
+      ..attr \filter 'url(#chalk-text)'
+      ..text "Současný počet žáků na jednoho učitele: 14"
+      ..attr \font-size 30
+      ..attr \fill \white
+      ..attr \x -7
+      ..attr \y 0
     group.append \g
       ..attr \transform "translate(0, 20)"
       ..append \rect
