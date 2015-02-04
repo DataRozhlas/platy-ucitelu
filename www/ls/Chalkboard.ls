@@ -1,5 +1,5 @@
 class ig.Chalkboard
-  (@parentElement, @countries) ->
+  (@parentElement, @countries, @budgets) ->
     @element = @parentElement.append \div
       ..attr \class \content
     @svg = @element.append \svg
@@ -19,20 +19,30 @@ class ig.Chalkboard
     taxes           = 0.34
     avgPayTax       = Math.round avgPay * taxes
     @explanatoryTextG.classed \disabled teachersToHire == 0
-    console.log "#{teachersToHire} učitelů je potřeba najmout"
-    console.log "x #{avgPay + avgPayTax} jejich superhrubá mzda"
-    console.log "x 12 měsíců"
-    console.log "#{teachersToHire * (avgPay + avgPayTax) * 12} celkem"
     @teachersToHire.text ig.utils.formatNumber Math.abs teachersToHire
     @teachersToHireText.text if teachersToHire > 0
       ". . . . . učitelů by bylo potřeba najmout"
     else
       ". . . . . učitelů by bylo možné propustit"
-    @totalCost.text ig.utils.formatNumber Math.abs teachersToHire * (avgPay + avgPayTax) * 12
+    totalPrice = Math.abs teachersToHire * (avgPay + avgPayTax) * 12
+    @totalCost.text ig.utils.formatNumber totalPrice
+
     @totalCostText.text if teachersToHire > 0
       "jsou celkové roční náklady"
     else
       "je celková roční úspora"
+    budget = @getClosestBudget totalPrice
+    @budgetText.text "To je přibližně rozpočet #{budget.urad}"
+
+  getClosestBudget: (amount) ->
+    currentDiff = Infinity
+    for {rozpocet}:budget, index in @budgets
+      d = Math.abs rozpocet - amount
+      if d > currentDiff
+        return @budgets[index - 1]
+      else
+        currentDiff = d
+    return budget
 
   initComputeRatioText: ->
     @explanatoryTextG = g = @svg.append \g
@@ -82,11 +92,13 @@ class ig.Chalkboard
       .attr \width 144
       .attr \height 2
     @totalCost = g.append \text
+      .attr \class \sum
       .text "3 501 900 660"
       .attr \text-anchor \end
       .attr \x 120
       .attr \y 34 * 3 + 10
     g.append \text
+      .attr \class \sum
       .text "Kč"
       .attr \x 132
       .attr \y 34 * 3 + 10
@@ -99,6 +111,9 @@ class ig.Chalkboard
       .text "jsou celkové roční náklady"
       .attr \x 189
       .attr \y 34 * 3 + 10
+    @budgetText = g.append \text
+      .attr \x 180
+      .attr \y 34 * 4 + 20
     g.selectAll \text .attr \filter 'url(#chalk-text)'
 
   drawZakPerUcitelLine: ->

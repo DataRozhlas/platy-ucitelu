@@ -1,5 +1,5 @@
-countries = ig.processData!
+{countries, budgets} = ig.processData!
 
 if ig.containers['pupil-count']
   container = d3.select that
-  new ig.Chalkboard container, countries
+  new ig.Chalkboard container, countries, budgets
