@@ -42,7 +42,7 @@ class ig.Chalkboard
     @headingText.text if teachersToHire == 0
       "Současný počet žáků na jednoho učitele: 14"
     else
-      "Vypočtený počet žáků na jednoho učitele: #{ratio}"
+      "Počet žáků na jednoho učitele: #{ratio}"
 
   computeForPercentage: (percentage) ->
     avgNational = 25218
@@ -255,6 +255,9 @@ class ig.Chalkboard
     extent = d3.extent grouped.map (.['plat-procent'])
     margin = 60
     width = 880
+    cz = @countries[0]
+      ..countries = [@countries[0]]
+    grouped.push cz
     xScale = d3.scale.linear!
       ..domain extent
       ..range [0, width]
@@ -282,6 +285,7 @@ class ig.Chalkboard
         ..classed \active-count -> it['plat-procent'] in [0.66 0.94 2.24]
         ..classed \active-country -> it['plat-procent'] in [0.66 0.94 2.24]
         ..attr \transform -> "translate(#{xScale it['plat-procent']}, 0)"
+        ..classed \cz -> it.zeme == "Česko"
         ..append \text
           ..attr \class \count
           ..attr \y 30
@@ -414,14 +418,21 @@ class ig.Chalkboard
           "translate(#x, #y)"
         ..attr \points "0,0 20,0 10,10"
     @svg.append \text
-      ..text "Myší nastavíte poměr pro výpočet ceny učitelů"
+      ..text "Myší změňte počet žáků a podívejte se,"
       ..attr \filter 'url(#chalk-text)'
       ..attr \font-size 20
       ..attr \fill \white
       ..attr \x 970
       ..attr \y 50
       ..attr \text-anchor \end
-
+    @svg.append \text
+      ..text "kolik by to stálo"
+      ..attr \filter 'url(#chalk-text)'
+      ..attr \font-size 20
+      ..attr \fill \white
+      ..attr \x 970
+      ..attr \y 80
+      ..attr \text-anchor \end
 
 
   initFilter: ->
