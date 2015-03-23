@@ -323,6 +323,10 @@ class ig.Chalkboard
       ..selectAll \path .data points .enter!append \path
         ..attr \d polygon
         ..attr \fill \transparent
+        ..on \touchstart ({point}) ~>
+          ticks.classed \active-mouse -> it is point
+          sgroup.classed \mouse-is-active yes
+          @computeForPercentage point['plat-procent']
         ..on \mouseover ({point}) ~>
           ticks.classed \active-mouse -> it is point
           sgroup.classed \mouse-is-active yes
@@ -404,6 +408,9 @@ class ig.Chalkboard
         ..attr \width rectWidth
         ..attr \height 400
         ..on \mouseover (ratio) ~>
+          @computeForRatio ratio
+          triangles.classed \disabled -> it isnt ratio
+        ..on \touchstart (ratio) ~>
           @computeForRatio ratio
           triangles.classed \disabled -> it isnt ratio
     triangles = group.append \g
