@@ -1,9 +1,7 @@
 {countries, budgets} = ig.processData!
-
-if ig.containers['pupil-count']
-  container = d3.select that
+container = d3.select ig.containers.base
+if window.location.hash == '#zaci'
   new ig.Chalkboard container, countries, budgets
-
-if ig.containers['money']
-  container = d3.select that
+else
+  container.classed \money yes
   new ig.Chalkboard container, countries, budgets, money: 1
