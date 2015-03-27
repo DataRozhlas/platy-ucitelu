@@ -10,7 +10,7 @@ class ig.Chalkboard
     if @isMoney
       @drawMoneyLine!
       @initMoneyText!
-      @computeForPercentage 1
+      @computeForPercentage 0.94
     else
       @drawZakPerUcitelLine!
       @initComputeRatioText!
